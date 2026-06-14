@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Обобщение пройденного материала</title>
+
+<style>
+body{
+    font-family: Arial, sans-serif;
+    background:#f4f6f9;
+    margin:0;
+    padding:0;
+}
+
+.container{
+    max-width:900px;
+    margin:auto;
+    padding:20px;
+}
+
+.card{
+    background:white;
+    padding:20px;
+    border-radius:12px;
+    box-shadow:0 0 10px rgba(0,0,0,.1);
+    margin-top:20px;
+}
+
+h1{
+    text-align:center;
+}
+
+input[type=text]{
+    width:100%;
+    padding:12px;
+    border:1px solid #ccc;
+    border-radius:8px;
+}
+
+button{
+    background:#2563eb;
+    color:white;
+    border:none;
+    padding:12px 20px;
+    border-radius:8px;
+    cursor:pointer;
+    margin-top:10px;
+}
+
+button:hover{
+    background:#1d4ed8;
+}
+
+.question{
+    margin-bottom:25px;
+    padding-bottom:15px;
+    border-bottom:1px solid #ddd;
+}
+
+.timer{
+    position:sticky;
+    top:0;
+    background:#ef4444;
+    color:white;
+    text-align:center;
+    padding:10px;
+    font-size:22px;
+    border-radius:10px;
+    margin-bottom:20px;
+}
+
+.hidden{
+    display:none;
+}
+
+.result{
+    font-size:24px;
+    text-align:center;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<div id="loginCard" class="card">
+<h1>Обобщение пройденного материала</h1>
+
+<label>Имя и фамилия:</label>
+<input type="text" id="studentName">
+
+<button onclick="startTest()">Начать тест</button>
+</div>
+
+<div id="testCard" class="card hidden">
+
+<div class="timer" id="timer">
+01:30:00
+</div>
+
+<form id="testForm"></form>
+
+<button onclick="submitTest()">
+Завершить тест
+</button>
+
+</div>
+
+<div id="resultCard" class="card hidden">
+<div class="result" id="resultText"></div>
+</div>
+
+</div>
+
+<script>
+
+/* ==========================
+   ВОПРОСЫ
+========================== */
+
+
+const questions = [
+
+{
+type:"choice",
+text:`<b>1.</b> Один из катетов прямоугольного треугольника равен 75% другого. Найдите гипотенузу, если радиус вписанной окружности равен 2`,
+options:["20","5","10","15","13"],
+correct:"C"
+},
+{
+type:"choice",
+text:`<b>2.</b> Решите неравенство:<br><br>(x + 5)√(x² − 4) > 0`,
+options:["(-∞; -2)","(-∞; -2) ∪ (2; +∞)","(-5; -2) ∪ (2; +∞)","(-∞; -5)","(-2; +∞)"],
+correct:"C"
+},
+{
+type:"choice",
+text:`<b>3.</b> Вычислите произведение xy из системы:<pre>⎧ y² − 3xy + x² + y − x + 9 = 0
+⎩ y − x = 2</pre>`,
+options:["24","16","9","12","15"],
+correct:"E"
+},
+{
+type:"choice",
+text:`<b>4.</b> Упростите выражение:<div style="text-align:center">(a+b)²−4(a+b)<hr>a²+b²+2ab−16</div>`,
+options:["a/b","(a+b)/(a+b+4)","4/(a+b)","(a+b−4)/(a+b+4)","(a+b)/4"],
+correct:"B"
+},
+{
+type:"choice",
+text:`<b>5.</b> По рисунку найдите x, если a || b<br><img src="q5.png.png" style="max-width:450px;width:100%">`,
+options:["120","140","30","75","125"],
+correct:"A"
+},
+{
+type:"choice",
+text:`<b>6.</b> Найдите x<br><img src="q6.png.png" style="max-width:450px;width:100%">`,
+options:["2","3","4","5","6"],
+correct:"A"
+},
+{
+type:"choice",
+text:`<b>7.</b> Вычислите |b+1/b|, если b²+1/b²−14=0`,
+options:["6","7","2","5","4"],
+correct:"E"
+},
+{
+type:"choice",
+text:`<b>8.</b> Найдите ab, если a+b=5 и a³+b³=50`,
+options:["4","10","6","3","5"],
+correct:"E"
+},
+{
+type:"choice",
+text:`<b>9.</b> Найдите |x+y| из системы<pre>⎧ y² + xy = 40
+⎩ x² + xy = 24</pre>`,
+options:["12","25","15","9","8"],
+correct:"E"
+},
+{
+type:"choice",
+text:`<b>10.</b> Сократите дробь<div style="text-align:center">x²−5<hr>x−√5</div>`,
+options:["√x + 5","x − √5","√x − 5","√x + 5","x + √5"],
+correct:"E"
+},
+{
+type:"choice",
+text:`<b>11.</b> AD — биссектриса. Найдите BD, если AB=18, AC=15 и BD−DC=2`,
+options:["8","15","9","11","12"],
+correct:"E"
+},
+{
+type:"choice",
+text:`<b>12.</b> Найдите значение √(4+√(21+√(13+√9)))`,
+options:["6","7","3","4","5"],
+correct:"C"
+},
+{
+type:"choice",
+text:`<b>13.</b> Найдите сумму <b>a+b</b>, если система <pre style='font-size:18px;'>⎧ 3x + ay = 9
+⎩ 4x − 36y = b</pre> имеет бесконечно много решений.`,
+options:["18","-15","-18","-12","15"],
+correct:"B"
+},
+{
+type:"choice",
+text:`<b>14.</b> Решите неравенство (√(2³))^(5−2x) < 1/8`,
+options:["X > 2","X < 2","X > -2","X < -7","X > 7"],
+correct:"E"
+},
+{
+type:"choice",
+text:`<b>15.</b> Если β тупой угол, γ развёрнутый угол и α+β+γ=300°, найдите наибольшее целое α`,
+options:["23","31","42","29","34"],
+correct:"D"
+},
+{
+type:"choice",
+text:`<b>16.</b> Найдите количество целых решений системы<pre>⎧ x² − 8x + 12 ≥ 0
+⎩ |x − 2| < 7</pre>`,
+options:["10","14","12","6","5"],
+correct:"A"
+},
+{type:"number",text:`<b>17.</b> Найдите значение дроби (b⁴+4)/(b²+2b+2), если b=11`,correct:"101"},
+{type:"number",text:`<b>18.</b> Найдите значение выражения (4b−a)/(a+b)<br><img src="q18.png.png" style="max-width:450px;width:100%">`,correct:"2.5"},
+{type:"number",text:`<b>19.</b> Найдите периметр треугольника, если |a+b−13|+|b+c−14|+|a+c−15|≤0`,correct:"21"},
+{type:"number",text:`<b>20.</b> Цену товара снизили на 40%, затем на 50%, затем повысили на 25%. На сколько процентов уменьшилась первоначальная цена?`,correct:"62.5"}
+];
+
+
+let currentStudent = "";
+let timeLeft = 5400;
+let timerInterval;
+
+/* ==========================
+   НАЧАЛО ТЕСТА
+========================== */
+
+window.startTest = async function(){
+
+const name =
+document.getElementById("studentName")
+.value.trim();
+
+if(!name){
+alert("Введите имя");
+return;
+}
+
+
+
+currentStudent = name;
+
+document
+.getElementById("loginCard")
+.classList.add("hidden");
+
+document
+.getElementById("testCard")
+.classList.remove("hidden");
+
+renderQuestions();
+startTimer();
+
+}
+
+/* ==========================
+   ВОПРОСЫ
+========================== */
+
+function renderQuestions(){
+
+const form =
+document.getElementById("testForm");
+
+questions.forEach((q,index)=>{
+
+const div =
+document.createElement("div");
+
+div.className="question";
+
+let html =
+`<h3>${q.text}</h3>`;
+
+if(q.type==="choice"){
+
+["A","B","C","D","E"]
+.forEach((letter,i)=>{
+
+html+=`
+<label>
+<input type="radio"
+name="q${index}"
+value="${letter}">
+${letter}) ${q.options[i]}
+</label><br>
+`;
+
+});
+
+}
+
+else{
+
+html+=`
+<input type="text"
+name="q${index}">
+`;
+
+}
+
+div.innerHTML=html;
+
+form.appendChild(div);
+
+});
+
+}
+
+/* ==========================
+   ТАЙМЕР
+========================== */
+
+function startTimer(){
+
+timerInterval =
+setInterval(()=>{
+
+timeLeft--;
+
+let h =
+Math.floor(timeLeft/3600);
+
+let m =
+Math.floor((timeLeft%3600)/60);
+
+let s =
+timeLeft%60;
+
+document
+.getElementById("timer")
+.innerText =
+`${String(h).padStart(2,'0')}:`+
+`${String(m).padStart(2,'0')}:`+
+`${String(s).padStart(2,'0')}`;
+
+if(timeLeft<=0){
+
+clearInterval(timerInterval);
+submitTest();
+
+}
+
+},1000);
+
+}
+
+/* ==========================
+   ПРОВЕРКА
+========================== */
+
+window.submitTest =
+async function(){
+
+for(let i=0;i<questions.length;i++){
+
+const q=questions[i];
+
+if(q.type==="choice"){
+
+if(!document.querySelector(
+`input[name=q${i}]:checked`
+)){
+alert(
+"Ответьте на все вопросы!"
+);
+return;
+}
+
+}else{
+
+const val =
+document.querySelector(
+`input[name=q${i}]`
+).value.trim();
+
+if(!val){
+alert(
+"Ответьте на все вопросы!"
+);
+return;
+}
+
+}
+
+}
+
+clearInterval(timerInterval);
+
+let score=0;
+
+questions.forEach((q,index)=>{
+
+if(q.type==="choice"){
+
+const val =
+document.querySelector(
+`input[name=q${index}]:checked`
+).value;
+
+if(val===q.correct)
+score++;
+
+}else{
+
+let val =
+document.querySelector(
+`input[name=q${index}]`
+).value
+.replace(",",".")
+.trim();
+
+if(val===q.correct)
+score++;
+
+}
+
+});
+
+const percent =
+((score/questions.length)*100)
+.toFixed(1);
+
+document
+.getElementById("testCard")
+.classList.add("hidden");
+
+document
+.getElementById("resultCard")
+.classList.remove("hidden");
+
+document
+.getElementById("resultText")
+.innerHTML=
+`
+<h2>${currentStudent}</h2>
+<p>Результат:</p>
+<p><b>${score}/20</b></p>
+<p>${percent}%</p>
+`;
+
+}
+
+</script>
+
+</body>
+</html>
